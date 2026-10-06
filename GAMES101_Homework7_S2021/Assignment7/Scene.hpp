@@ -24,6 +24,9 @@ public:
     int maxDepth = 1;
     float RussianRoulette = 0.8;
     int spp = 16; // 每个像素的路径采样次数
+    unsigned int threads = 0; // 0 表示使用硬件并发数，1 表示单线程
+    unsigned int seed = 42; // 固定像素种子，使结果不依赖线程调度顺序
+    std::string outputPath = "binary.ppm";
 
     Scene(int w, int h) : width(w), height(h)
     {}

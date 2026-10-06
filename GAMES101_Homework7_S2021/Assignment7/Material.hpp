@@ -8,7 +8,7 @@
 #include "Vector.hpp"
 #include <stdexcept>
 
-enum MaterialType { DIFFUSE};
+enum MaterialType { DIFFUSE, MICROFACET };
 
 class Material{
 private:
@@ -93,6 +93,8 @@ public:
     float ior;
     Vector3f Kd, Ks;
     float specularExponent;
+    float roughness = 0.4f; // 感知粗糙度，GGX 的 alpha = roughness²
+    float metallic = 0.85f; // 金属度，0 为电介质，1 为金属
     // Texture tex; // 预留纹理成员（已停用）
 
     inline Material(MaterialType t=DIFFUSE, Vector3f e=Vector3f(0,0,0));
@@ -115,6 +117,10 @@ Material::Material(MaterialType t, Vector3f e){
     m_type = t;
     // m_color = c; // 预留颜色赋值（已停用）
     m_emission = e;
+    Kd = Vector3f(0.5f);
+    Ks = Vector3f(0.04f); // 电介质的法向反射率 F0
+    ior = 1.5f;
+    specularExponent = 25;
 }
 
 MaterialType Material::getType(){return m_type;}
@@ -133,6 +139,7 @@ Vector3f Material::getColorAt(double u, double v) {
 Vector3f Material::sample(const Vector3f &wi, const Vector3f &N){
     switch(m_type){
         case DIFFUSE:
+        case MICROFACET:
         {
             // 在法线所在的半球上均匀采样方向
             float x_1 = get_random_float(), x_2 = get_random_float();
@@ -150,6 +157,7 @@ Vector3f Material::sample(const Vector3f &wi, const Vector3f &N){
 float Material::pdf(const Vector3f &wi, const Vector3f &wo, const Vector3f &N){
     switch(m_type){
         case DIFFUSE:
+        case MICROFACET:
         {
             // 半球均匀采样的概率密度为 1 / (2 * PI)
             if (dotProduct(wo, N) > 0.0f)
@@ -175,6 +183,40 @@ Vector3f Material::eval(const Vector3f &wi, const Vector3f &wo, const Vector3f &
             else
                 return Vector3f(0.0f);
             break;
+        }
+        case MICROFACET:
+        {
+            // 框架 wi 为射入表面的传播方向；BRDF 的 V、L 均从表面向外。
+            const Vector3f V = normalize(-wi);
+            const Vector3f L = normalize(wo);
+            const Vector3f normal = normalize(N);
+            const float nV = clamp(0.f, 1.f, dotProduct(normal, V));
+            const float nL = clamp(0.f, 1.f, dotProduct(normal, L));
+            if (nV <= 0 || nL <= 0) return Vector3f();
+            const Vector3f H = normalize(V + L);
+            const float nH = clamp(0.f, 1.f, dotProduct(normal, H));
+            const float vH = clamp(0.f, 1.f, dotProduct(V, H));
+
+            // 各向同性 GGX 法线分布；限制最小粗糙度以避免理想镜面的奇点。
+            const double r = clamp(0.05f, 1.f, roughness);
+            const double alpha = r * r;
+            const double alpha2 = alpha * alpha;
+            const double d = double(nH) * nH * (alpha2 - 1.0) + 1.0;
+            const double D = alpha2 / (M_PI * d * d);
+            const auto smithG1 = [alpha2](double cosine) {
+                return 2.0 * cosine /
+                    (cosine + std::sqrt(alpha2 + (1.0 - alpha2) * cosine * cosine));
+            };
+            const double G = smithG1(nV) * smithG1(nL);
+
+            const float metal = clamp(0.f, 1.f, metallic);
+            const Vector3f F0 = Ks * (1.f - metal) + Kd * metal;
+            const float grazing = std::pow(1.f - vH, 5.f);
+            const Vector3f F = F0 + (Vector3f(1.f) - F0) * grazing;
+            const Vector3f specular = F * float(D * G / (4.0 * nV * nL));
+            // 金属没有漫反射项；电介质漫反射按菲涅耳反射后的剩余能量缩放。
+            const Vector3f diffuse = (Vector3f(1.f) - F) * Kd * ((1.f - metal) / M_PI);
+            return diffuse + specular;
         }
     }
     throw std::invalid_argument("Unsupported material type in eval");

@@ -1,0 +1,48 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "clion-debug",
+      "displayName": "作业 7 Debug (MinGW GCC 11.2)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/cmake-build-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_COMPILER": "D:/games101/toolchains/gcc-11.2/mingw64/bin/g++.exe",
+        "CMAKE_MAKE_PROGRAM": "D:/games101/toolchains/gcc-11.2/mingw64/bin/ninja.exe"
+      },
+      "environment": {
+        "PATH": "D:/games101/toolchains/gcc-11.2/mingw64/bin;$penv{PATH}"
+      }
+    },
+    {
+      "name": "clion-release",
+      "displayName": "作业 7 Release (MinGW GCC 11.2)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/cmake-build-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_COMPILER": "D:/games101/toolchains/gcc-11.2/mingw64/bin/g++.exe",
+        "CMAKE_MAKE_PROGRAM": "D:/games101/toolchains/gcc-11.2/mingw64/bin/ninja.exe"
+      },
+      "environment": {
+        "PATH": "D:/games101/toolchains/gcc-11.2/mingw64/bin;$penv{PATH}"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "clion-debug",
+      "configurePreset": "clion-debug"
+    },
+    {
+      "name": "clion-release",
+      "configurePreset": "clion-release"
+    }
+  ]
+}

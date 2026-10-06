@@ -1,0 +1,56 @@
+{
+  "build": "Release, MinGW GCC 11.2, C++17",
+  "benchmark": {
+    "size": 256,
+    "spp": 64,
+    "seed": 42,
+    "material": "diffuse",
+    "single": {
+      "seconds": 15.7237,
+      "threads": 1
+    },
+    "parallel": {
+      "seconds": 1.81672,
+      "threads": 20
+    },
+    "speedup": 8.654993614866353,
+    "identical_ppm": true,
+    "sha256": "5d714064875cbc818ee9fc5f3933d1b6acb3f07d733a3a4a0c4e45c7cd06f19f",
+    "note": "一次同参数本机测量，性能受机器负载与硬件影响"
+  },
+  "microfacet": {
+    "size": 512,
+    "spp": 256,
+    "seed": 42,
+    "roughness": 0.4,
+    "metallic": 0.85,
+    "seconds": 45.0776,
+    "threads": 20
+  },
+  "microfacet_rough": {
+    "size": 512,
+    "spp": 256,
+    "seed": 42,
+    "roughness": 0.7,
+    "metallic": 0.85,
+    "seconds": 45.4009,
+    "threads": 20
+  },
+  "tests": {
+    "root_debug": "passed",
+    "root_release": "passed",
+    "checks": [
+      "geometry",
+      "area sampling",
+      "GGX analytic value",
+      "BRDF reciprocity",
+      "roughness highlights",
+      "grazing stability",
+      "energy spot check",
+      "thread count identical output",
+      "worker exception propagation"
+    ]
+  },
+  "debugger": "MinGW GDB hit Renderer::Render in Debug binary and printed main stack",
+  "clion": "cg root presets and shared run configurations saved; GUI reopening not automated"
+}

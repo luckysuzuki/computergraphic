@@ -10,7 +10,7 @@
 | 4 | [贝塞尔曲线](GAMES101_Homework4_S2021/Assignment4/README.md) | 递归曲线及历史截图 |
 | 5 | [Whitted 光线追踪](GAMES101_Homework5_S2021/Homework5/Assignment5/README.md) | 主光线、求交及历史渲染 |
 | 6 | [BVH 与 SAH](GAMES101_Homework6_S2021/Homework6/Assignment6/README.md) | BVH/SAH 源码及 bunny 结果 |
-| 7 | [路径追踪](GAMES101_Homework7_S2021/Assignment7/README.md) | 基础实现、回归检查及 512×512 / 64 SPP 结果 |
+| 7 | [路径追踪](GAMES101_Homework7_S2021/Assignment7/README.md) | 基础与两个加分项，CLion 配置、回归与 512×512 / 256 SPP 微表面结果 |
 | 8 | [质点弹簧模拟](GAMES101_Homework8_S2021/Assignment8/README.md) | 原始框架，算法与环境待完成 |
 
 当前归档作业 3–8。作业 1、2 与大作业不在本次 cg 目录归档范围内。
@@ -34,7 +34,9 @@
 
 ## 构建环境
 
-各作业分别具有 CMakeLists.txt，不是一个统一的顶层 CMake 项目。
+各作业保留独立 CMakeLists.txt。cg 根目录现在提供作业 7 的 CMake 入口和 Debug / Release 预设，CLion 可直接打开 cg。
+
+作业 7 已实现多线程和 GGX Microfacet。共享配置包含 Homework7 Preview、Final、Tests，详细使用方法见 [CLion 与加分项说明](GAMES101_Homework7_S2021/Assignment7/BONUS.md)。
 
 | 作业 | 主要依赖 |
 | --- | --- |
@@ -60,3 +62,7 @@
 代码基于 GAMES101 提供的作业框架并包含学习过程中的修改。第三方 OBJ 加载器、CGL、GLFW、GLEW 等保留原作者和许可说明；仓库不为这些依赖声明新的统一许可证。
 
 课程入口：[GAMES101 官方课程页](https://sites.cs.ucsb.edu/~lingqi/teaching/games101.html)。
+
+## 作业 7 加分项更新
+
+多线程像素写入互不重叠，固定种子下与单线程结果一致。256×256、64 SPP 同参数测得约 8.65 倍加速；实际性能随硬件和负载变化。Microfacet 使用 GGX / Smith / Schlick，已提供 512×512、256 SPP 的粗糙度对比图。Debug / Release 回归及 GDB 断点检查通过。

@@ -1,12 +1,12 @@
 # 作业 7：路径追踪实现与学习指南
 
-基础版本已实现：三角形求交、AABB 求交、BVH 遍历、直接光照、间接反射和俄罗斯轮盘赌。保留中文注释及学习材料。此版本使用 DIFFUSE 材质，未实现多线程和 Microfacet 加分项。
+基础版本已实现：三角形求交、AABB 求交、BVH 遍历、直接光照、间接反射和俄罗斯轮盘赌。保留中文注释及学习材料。同时实现多线程和 GGX Microfacet 加分项，支持 DIFFUSE / MICROFACET 参数切换。CLion 使用详见 [加分项说明](BONUS.md)。
 
 ## 1. 构建与运行
 
 本机使用 MinGW GCC 11.2 + Ninja，工具链位于 `D:/games101/toolchains/gcc-11.2/mingw64/bin`，源码采用 C++17 和 UTF-8。无需 OpenCV、Eigen、OpenGL。
 
-在 `D:\games101\GAMES101_Homework_S2021\GAMES101_Homework7_S2021\Assignment7` 运行：
+在 `D:\games101\GAMES101_Homework_S2021\cg\GAMES101_Homework7_S2021\Assignment7` 运行：
 
 ```powershell
 # 默认 784×784、16 SPP，Release 渲染
@@ -58,7 +58,7 @@ BVH 不拥有传入的 Object。现有 Scene 和 MeshTriangle 仍沿用框架的
 - [ ] 理解面积 PDF 与方向 PDF 为什么不能混用。
 - [ ] 改变 SPP，对比噪声；改变 Kd，观察颜色反弹。
 - [ ] 补充姓名、学号及自己的理解到文末报告模板。
-- [ ] 如需要加分，另行实现多线程或 Microfacet；注意随机数与像素写入竞争。
+- [x] 多线程和 Microfacet 已实现，阅读 BONUS.md 理解冲突处理和 BRDF。
 - [ ] 若提交到课程指定环境，再在对应虚拟机中编译验证。
 - [ ] 打包前排除构建目录、日志、IDE 配置和临时备份，包含所有所需源码、模型与图片。
 
@@ -77,7 +77,7 @@ BVH 不拥有传入的 Object。现有 Scene 和 MeshTriangle 仍沿用框架的
 | `Bounds3` | `Bounds3.hpp` | 轴对齐包围盒 AABB；并集、中心、范围；IntersectP 支持 BVH 剔除 |
 | `BVHBuildNode` | `BVH.hpp` | 包围盒、左右子节点、叶节点图元和子树面积；area 用于采样 |
 | `BVHAccel` | `BVH.hpp` / `BVH.cpp` | recursiveBuild 构建树、getIntersection 遍历求交、Sample 对图元集合采样 |
-| `Material` | `Material.hpp` | Kd、发光值及 sample / pdf / eval；当前仅 DIFFUSE，PDF 和 BRDF 是不同量 |
+| `Material` | `Material.hpp` | Kd、发光值及 sample / pdf / eval；支持 DIFFUSE / MICROFACET；粗糙度、金属度、GGX/Smith/Schlick，PDF 和 BRDF 是不同量 |
 | `Scene` | `Scene.hpp` / `Scene.cpp` | 物体管理、场景 BVH、光源采样、路径追踪；重点 intersect、sampleLight、castRay 和 RussianRoulette |
 | `Renderer` | `Renderer.hpp` / `Renderer.cpp` | 相机光线、每像素 SPP 次累加、写 PPM；相机位置 `(278,273,-800)` |
 | `Light` | `Light.hpp` | 旧光源基类，保存位置与强度；当前 Scene::lights 未使用 |
@@ -159,7 +159,7 @@ Debug 和 Release 的 geometry-and-sampling 回归检查覆盖：正负光线方
 - 基础项：已实现三种求交与路径追踪；环境和结果已验证。
 - 输出参数：512×512，64 SPP，P_RR=0.8，DIFFUSE，单线程。
 - 计算时间：见 images/render-summary.txt。
-- 加分项：未实现多线程与 Microfacet。
+- 加分项：已实现多线程与 GGX Microfacet，比较图见 BONUS.md。
 - 实现理解与学习总结：待你填写。
 
 本地 2021 年 PDF 的基础路径追踪为 45 分、格式与可编译运行为 5 分，多线程及 Microfacet 各为 10 分加分项。评分由课程方决定。

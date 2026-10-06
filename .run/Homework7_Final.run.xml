@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Homework7 Final" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="--size 512 --spp 256 --threads 0 --material microfacet --roughness 0.4 --output microfacet.ppm" PROJECT_NAME="ComputerGraphic" TARGET_NAME="RayTracing" CONFIG_NAME="clion-release" RUN_TARGET_PROJECT_NAME="ComputerGraphic" RUN_TARGET_NAME="RayTracing">
+    <option name="WORKING_DIR" value="$PROJECT_DIR$/cmake-build-release" />
+    <envs>
+      <env name="PATH" value="D:\games101\toolchains\gcc-11.2\mingw64\bin;$PATH$" />
+    </envs>
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

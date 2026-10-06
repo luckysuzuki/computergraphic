@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Homework7 Tests" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="" PROJECT_NAME="ComputerGraphic" TARGET_NAME="HW7Tests" CONFIG_NAME="clion-debug" RUN_TARGET_PROJECT_NAME="ComputerGraphic" RUN_TARGET_NAME="HW7Tests">
+    <option name="WORKING_DIR" value="$PROJECT_DIR$/cmake-build-debug" />
+    <envs>
+      <env name="PATH" value="D:\games101\toolchains\gcc-11.2\mingw64\bin;$PATH$" />
+    </envs>
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

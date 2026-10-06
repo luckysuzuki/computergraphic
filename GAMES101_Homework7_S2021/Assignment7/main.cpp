@@ -20,20 +20,60 @@ int main(int argc, char** argv)
 
     // 修改此处的宽高可以调整图像分辨率
     Scene scene(784, 784);
-    // 可用 --size N --spp N 调整预览或最终渲染参数。
+    bool useMicrofacet = false;
+    bool checkScene = false;
+    float roughness = 0.4f, metallic = 0.85f;
+    // 所有选项都可直接填入 CLion 的程序参数栏。
     try {
         for (int i = 1; i < argc; ++i) {
             const std::string argument = argv[i];
-            if (argument == "--check-scene") continue;
-            if ((argument != "--size" && argument != "--spp") || i + 1 >= argc)
-                throw std::invalid_argument("Usage: RayTracing [--size N] [--spp N] [--check-scene]");
+            if (argument == "--check-scene") { checkScene = true; continue; }
+            if (argument == "--help") {
+                std::cout << "RayTracing [--size N] [--spp N] [--threads N (0=auto)]\n"
+                          << "  [--material diffuse|microfacet] [--roughness 0.05..1]\n"
+                          << "  [--metallic 0..1] [--seed N] [--output path.ppm] [--check-scene]\n";
+                return 0;
+            }
+            if (i + 1 >= argc) throw std::invalid_argument("Missing value for " + argument);
             const std::string value = argv[++i];
+            if (argument == "--output") {
+                if (value.empty()) throw std::invalid_argument("Output path must not be empty");
+                scene.outputPath = value;
+                continue;
+            }
+            if (argument == "--material") {
+                if (value != "diffuse" && value != "microfacet")
+                    throw std::invalid_argument("Material must be diffuse or microfacet");
+                useMicrofacet = value == "microfacet";
+                continue;
+            }
             size_t parsed = 0;
+            if (argument == "--roughness" || argument == "--metallic") {
+                const float number = std::stof(value, &parsed);
+                const float minimum = argument == "--roughness" ? .05f : 0.f;
+                if (parsed != value.size() || !std::isfinite(number) || number < minimum || number > 1)
+                    throw std::invalid_argument("Invalid value for " + argument);
+                if (argument == "--roughness") roughness = number;
+                else metallic = number;
+                continue;
+            }
+            if (argument == "--seed") {
+                const auto number = std::stoull(value, &parsed);
+                if (parsed != value.size() || number > std::numeric_limits<unsigned int>::max())
+                    throw std::invalid_argument("Seed must be an unsigned 32-bit integer");
+                scene.seed = static_cast<unsigned int>(number);
+                continue;
+            }
+            if (argument != "--size" && argument != "--spp" && argument != "--threads")
+                throw std::invalid_argument("Unknown option: " + argument);
             const int count = std::stoi(value, &parsed);
-            if (parsed != value.size() || count <= 0 || count > 8192)
-                throw std::invalid_argument("size and spp must be integers in [1, 8192]");
+            const int minimum = argument == "--threads" ? 0 : 1;
+            const int maximum = argument == "--threads" ? 256 : 8192;
+            if (parsed != value.size() || count < minimum || count > maximum)
+                throw std::invalid_argument("Invalid integer value for " + argument);
             if (argument == "--size") scene.width = scene.height = count;
-            else scene.spp = count;
+            else if (argument == "--spp") scene.spp = count;
+            else scene.threads = count;
         }
     } catch (const std::exception& error) {
         std::cerr << error.what() << '\n';
@@ -49,9 +89,18 @@ int main(int argc, char** argv)
     Material* light = new Material(DIFFUSE, (8.0f * Vector3f(0.747f+0.058f, 0.747f+0.258f, 0.747f) + 15.6f * Vector3f(0.740f+0.287f,0.740f+0.160f,0.740f) + 18.4f *Vector3f(0.737f+0.642f,0.737f+0.159f,0.737f)));
     light->Kd = Vector3f(0.65f);
 
+    // 只替换两个箱子的材质，墙壁保持漫反射，便于观察微表面反射差异。
+    Material gold(MICROFACET), silver(MICROFACET);
+    gold.Kd = Vector3f(.83f, .63f, .28f);
+    silver.Kd = Vector3f(.8f, .82f, .85f);
+    gold.roughness = silver.roughness = roughness;
+    gold.metallic = silver.metallic = metallic;
+    std::cout << "Box material: " << (useMicrofacet ? "microfacet" : "diffuse")
+              << ", roughness: " << roughness << ", metallic: " << metallic << '\n';
+
     MeshTriangle floor(HW7_MODEL_DIR "/floor.obj", white);
-    MeshTriangle shortbox(HW7_MODEL_DIR "/shortbox.obj", white);
-    MeshTriangle tallbox(HW7_MODEL_DIR "/tallbox.obj", white);
+    MeshTriangle shortbox(HW7_MODEL_DIR "/shortbox.obj", useMicrofacet ? &gold : white);
+    MeshTriangle tallbox(HW7_MODEL_DIR "/tallbox.obj", useMicrofacet ? &silver : white);
     MeshTriangle left(HW7_MODEL_DIR "/left.obj", red);
     MeshTriangle right(HW7_MODEL_DIR "/right.obj", green);
     MeshTriangle light_(HW7_MODEL_DIR "/light.obj", light);
@@ -66,9 +115,6 @@ int main(int argc, char** argv)
     scene.buildBVH();
 
     // 仅检查模型加载及 BVH 构建，便于在求交和路径追踪未完成时验证环境。
-    bool checkScene = false;
-    for (int i = 1; i < argc; ++i)
-        if (std::string(argv[i]) == "--check-scene") checkScene = true;
     if (checkScene) {
         std::cout << "Scene check passed: " << scene.objects.size() << " meshes loaded.\n";
         return 0;
@@ -76,19 +122,17 @@ int main(int argc, char** argv)
 
     Renderer r;
 
-    auto start = std::chrono::system_clock::now();
+    auto start = std::chrono::steady_clock::now();
     try {
         r.Render(scene);
     } catch (const std::exception& error) {
         std::cerr << error.what() << '\n';
         return 1;
     }
-    auto stop = std::chrono::system_clock::now();
+    auto stop = std::chrono::steady_clock::now();
 
     std::cout << "Render complete: \n";
-    std::cout << "Time taken: " << std::chrono::duration_cast<std::chrono::hours>(stop - start).count() << " hours\n";
-    std::cout << "          : " << std::chrono::duration_cast<std::chrono::minutes>(stop - start).count() << " minutes\n";
-    std::cout << "          : " << std::chrono::duration_cast<std::chrono::seconds>(stop - start).count() << " seconds\n";
+    std::cout << "Time taken: " << std::chrono::duration<double>(stop - start).count() << " seconds\n";
 
     return 0;
 }

@@ -25,3 +25,7 @@ binary.ppm
 CMakeUserPresets.json
 
 .run/
+
+# 分享可直接使用的 CLion 作业 7 运行配置
+!/.run/
+!/.run/*.run.xml

@@ -28,13 +28,23 @@ inline  bool solveQuadratic(const float &a, const float &b, const float &c, floa
     return true;
 }
 
-inline float get_random_float()
+inline std::mt19937& random_engine()
 {
     // 每线程只初始化一次随机数引擎，避免每次采样重新访问系统熵源。
     thread_local std::mt19937 rng(std::random_device{}());
+    return rng;
+}
+
+inline void seed_random(unsigned int seed)
+{
+    random_engine().seed(seed);
+}
+
+inline float get_random_float()
+{
     std::uniform_real_distribution<float> dist(0.f, 1.f); // 在 [0, 1) 内均匀采样；原注释的 [1, 6] 与代码不符
 
-    return dist(rng);
+    return dist(random_engine());
 }
 
 inline void UpdateProgress(float progress)
