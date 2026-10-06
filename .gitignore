@@ -1,0 +1,27 @@
+# 本机生成内容，保留源代码、模型 OBJ 与结果图片
+.idea/
+.vscode/
+.codex*/
+__MACOSX/
+.DS_Store
+._*
+build/
+build-*/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json
+*.exe
+*.dll
+*.o
+*.a
+*.lib
+*.pdb
+*.ilk
+*.bin
+*.log
+*.zip
+binary.ppm
+CMakeUserPresets.json
+
+.run/

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/games101/**)",
+      "Read(//d/games101/GAMES101_Homework_S2021/**)",
+      "Bash(cmake -S . -B build -G \"MinGW Makefiles\")",
+      "Bash(cmake --build build)"
+    ]
+  }
+}

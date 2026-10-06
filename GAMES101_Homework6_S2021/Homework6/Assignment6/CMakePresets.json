@@ -1,0 +1,32 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "clion-debug",
+      "displayName": "CLion Debug (MinGW GCC 11.2)",
+      "description": "Local Windows preset for the GAMES101 toolchain.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/cmake-build-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "D:/games101/toolchains/gcc-11.2/mingw64/bin/gcc.exe",
+        "CMAKE_CXX_COMPILER": "D:/games101/toolchains/gcc-11.2/mingw64/bin/g++.exe"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "clion-debug",
+      "displayName": "Build RayTracing (Debug)",
+      "configurePreset": "clion-debug",
+      "targets": [
+        "RayTracing"
+      ]
+    }
+  ]
+}

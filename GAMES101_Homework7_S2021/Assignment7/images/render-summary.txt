@@ -1,0 +1,5 @@
+Release, single thread, 512x512, 64 SPP, P_RR=0.8
+Render complete: 
+Time taken: 0 hours
+          : 1 minutes
+          : 67 seconds
